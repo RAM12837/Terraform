@@ -4,5 +4,5 @@ output "bucket_name" {
 }
 
 output "bucket_ARN" {
-    value = aws_s3_bucket.demo_bucket.arn
+  value = aws_s3_bucket.demo_bucket.arn
 }
