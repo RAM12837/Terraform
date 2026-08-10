@@ -42,6 +42,18 @@ env | grep TF_
 terraform plan
 ```
 
+```powershell
+# Set environment variables in PowerShell (same shell where you will run Terraform)
+$env:TF_VAR_environment_name = "predev"
+$env:TF_VAR_aws_region = "us-east-2"
+
+# Verify if env variable is set
+Get-ChildItem env:TF_VAR_environment_name, env:TF_VAR_aws_region
+
+# Terraform Plan
+terraform plan
+```
+
 ### Observation:
 - `environment_name` and `aws_region` values are overridden by environment variables (TF_VAR_*), replacing the defaults defined in c2-variables.tf.
 - These env vars will continue to apply unless a higher-precedence source (like terraform.tfvars, *.auto.tfvars, or CLI -var/-var-file) overrides them.
@@ -97,6 +109,10 @@ terraform plan
 ```bash
 # Terraform Plan with prod environment variables
 terraform plan -var-file=prod.tfvars
+```
+```powershell
+# In PowerShell, this is the safer form:
+terraform plan -var-file prod.tfvars
 ```
 ### Observation
 1. Values from `prod.tfvars` override:

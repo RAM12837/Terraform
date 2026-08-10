@@ -1,6 +1,6 @@
 # Environment & Region 
-environment_name = "dev1"
-aws_region       = "us-east-1"
+env_name = "dev1"
+aws_region = "us-east-1"
 
 # CIDR for VPC
 vpc_cidr = "10.1.0.0/16"

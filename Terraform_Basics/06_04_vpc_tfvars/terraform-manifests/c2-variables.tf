@@ -18,7 +18,7 @@ variable "vpc_cidr" {
     default = "10.0.0.0/16"
 }
 # 4. Tag
-variable "tag" {
+variable "tags" {
     description = "Tag to deploy the resources"
     type = map(string)
     default = {
