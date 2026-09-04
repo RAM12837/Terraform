@@ -204,38 +204,54 @@ function Invoke-HouseKeeping {
     }
 
     # Remove Unknown Profiles
-    try {
+    $RemovedProfiles = @()
 
-        $ExcludedProfiles = @(
-            "Administrator",
-            "Default",
-            "Default User",
-            "Public",
-            "All Users",
-            "systemprofile",
-            "LocalService",
-            "NetworkService"
-        )
+    try {
 
         Get-CimInstance Win32_UserProfile |
         Where-Object {
-            $_.LocalPath -like 'C:\Users\*' -and
             $_.Special -eq $false -and
-            $_.Loaded -eq $false -and
-            (Split-Path $_.LocalPath -Leaf) -notin $ExcludedProfiles
+            $_.Loaded -eq $false
         } |
         ForEach-Object {
 
             try {
-                Remove-CimInstance $_ -ErrorAction Stop
+
+                $SID = $_.SID
+
+                try {
+                    ([System.Security.Principal.SecurityIdentifier]$SID).
+                        Translate([System.Security.Principal.NTAccount]) | Out-Null
+                }
+                catch {
+
+                    $RemovedProfiles += [PSCustomObject]@{
+                        SID       = $SID
+                        LocalPath = $_.LocalPath
+                    }
+
+                    Remove-CimInstance $_ -ErrorAction Stop
+                }
             }
             catch {
                 Write-Output "Failed to remove profile $($_.LocalPath)"
             }
         }
+
+        if ($RemovedProfiles.Count -gt 0) {
+
+            Write-Output "Removed Account Unknown Profiles:"
+
+            $RemovedProfiles | ForEach-Object {
+                Write-Output "$($_.LocalPath) - $($_.SID)"
+            }
+        }
+        else {
+            Write-Output "No Account Unknown profiles found."
+        }
     }
     catch {
-        Write-Output "User profile cleanup failed."
+        Write-Output "Account Unknown profile cleanup failed : $($_.Exception.Message)"
     }
 
     Write-Output "Housekeeping completed."
