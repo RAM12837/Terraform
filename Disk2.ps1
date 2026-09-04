@@ -16,8 +16,6 @@ function Get-DiskUsage {
 
     param([string]$Drive)
 
-    $Drive = $Drive.TrimEnd("\")
-
     $disk = Get-CimInstance Win32_LogicalDisk |
             Where-Object { $_.DeviceID -eq $Drive }
 
@@ -27,9 +25,9 @@ function Get-DiskUsage {
 
     [PSCustomObject]@{
         Drive       = $Drive
-        SizeGB      = ($disk.Size / 1GB)
-        FreeGB      = ($disk.FreeSpace / 1GB)
-        UsedPercent = ((($disk.Size - $disk.FreeSpace) / $disk.Size) * 100)
+        SizeGB      = "{0:N2}" -f ($disk.Size / 1GB)
+        FreeGB      = "{0:N2}" -f ($disk.FreeSpace / 1GB)
+        UsedPercent = "{0:N2}" -f ((($disk.Size - $disk.FreeSpace) / $disk.Size) * 100)
     }
 }
 
@@ -75,11 +73,36 @@ function Get-TopFiles {
     Get-ChildItem $Path -File -Recurse -Force -ErrorAction SilentlyContinue |
     Sort-Object Length -Descending |
     Select-Object -First $Top FullName,
-    @{Name="SizeGB";Expression={"{0:N2}" -f ($_.Length / 1GB)}}
+    @{Name="SizeGB";Expression={"{0:N2}" -f (($_.Length/1GB))}}
 }
 
 # ==========================================
-# Create Work Notes
+# Get Largest Profiles
+# ==========================================
+
+function Get-LargestProfiles {
+
+    $profiles = "C:\Users"
+
+    Get-ChildItem $profiles -Directory -ErrorAction SilentlyContinue |
+    ForEach-Object {
+
+        $size = (
+            Get-ChildItem $_.FullName -Recurse -Force -ErrorAction SilentlyContinue |
+            Measure-Object Length -Sum
+        ).Sum
+
+        [PSCustomObject]@{
+            Profile = $_.Name
+            SizeGB  = "{0:N2}" -f ($size / 1GB)
+        }
+    } |
+    Sort-Object SizeGB -Descending |
+    Select-Object -First 10
+}
+
+# ==========================================
+# Create Work Note
 # ==========================================
 
 function New-WorkNote {
@@ -87,27 +110,37 @@ function New-WorkNote {
     param(
         [string]$Stage,
         [decimal]$Utilization,
-        [object]$TopFolders,
-        [object]$TopFiles
+        [object]$TopFolders = $null,
+        [object]$TopFiles = $null
     )
 
     $Note = @"
 Stage : $Stage
 Drive : C:
-Utilization : $('{0:N2}' -f $Utilization) %
-
-Top 10 Folders:
+Utilization : $Utilization %
 
 "@
 
-    foreach ($Folder in $TopFolders) {
-        $Note += "$($Folder.Name) - $($Folder.SizeGB) GB`r`n"
+    if ($TopFolders) {
+
+        $Note += "Top 10 Folders:`r`n"
+
+        foreach ($Folder in $TopFolders) {
+            $Note += "$($Folder.Name) - $($Folder.SizeGB) GB`r`n"
+        }
+
+        $Note += "`r`n"
     }
 
-    $Note += "`r`nTop 10 Files:`r`n"
+    if ($TopFiles) {
 
-    foreach ($File in $TopFiles) {
-        $Note += "$($File.FullName) - $($File.SizeGB) GB`r`n"
+        $Note += "Top 10 Files:`r`n"
+
+        foreach ($File in $TopFiles) {
+            $Note += "$($File.FullName) - $($File.SizeGB) GB`r`n"
+        }
+
+        $Note += "`r`n"
     }
 
     return $Note
@@ -119,28 +152,33 @@ Top 10 Folders:
 
 function Invoke-HouseKeeping {
 
-    $DeletedProfiles = @()
-
     Write-Output "Starting housekeeping..."
 
     # Recycle Bin
-
     try {
+
         Get-ChildItem "C:\`$Recycle.Bin" -Force -ErrorAction SilentlyContinue |
-        Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+
+        Write-Output "Recycle Bin cleanup completed."
     }
-    catch {}
+    catch {
+        Write-Output "Recycle Bin cleanup failed."
+    }
 
     # Windows Temp
-
     try {
+
         Get-ChildItem "C:\Windows\Temp" -Force -Recurse -ErrorAction SilentlyContinue |
-        Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+
+        Write-Output "Windows Temp cleanup completed."
     }
-    catch {}
+    catch {
+        Write-Output "Windows Temp cleanup failed."
+    }
 
     # Software Distribution
-
     try {
 
         $SCCMServer = Get-Service SMS_EXECUTIVE -ErrorAction SilentlyContinue
@@ -159,10 +197,14 @@ function Invoke-HouseKeeping {
                 Remove-Item -Force -ErrorAction SilentlyContinue
             }
         }
-    }
-    catch {}
 
-    # Unknown Profiles Cleanup
+    }
+    catch {
+        Write-Output "SoftwareDistribution cleanup failed."
+    }
+
+    # Remove Unknown Profiles
+    $RemovedProfiles = @()
 
     try {
 
@@ -179,11 +221,11 @@ function Invoke-HouseKeeping {
 
                 try {
                     ([System.Security.Principal.SecurityIdentifier]$SID).
-                    Translate([System.Security.Principal.NTAccount]) | Out-Null
+                        Translate([System.Security.Principal.NTAccount]) | Out-Null
                 }
                 catch {
 
-                    $DeletedProfiles += [PSCustomObject]@{
+                    $RemovedProfiles += [PSCustomObject]@{
                         SID       = $SID
                         LocalPath = $_.LocalPath
                     }
@@ -191,62 +233,75 @@ function Invoke-HouseKeeping {
                     Remove-CimInstance $_ -ErrorAction Stop
                 }
             }
-            catch {}
+            catch {
+                Write-Output "Failed to remove profile $($_.LocalPath)"
+            }
+        }
+
+        if ($RemovedProfiles.Count -gt 0) {
+
+            Write-Output "Removed Account Unknown Profiles:"
+
+            $RemovedProfiles | ForEach-Object {
+                Write-Output "$($_.LocalPath) - $($_.SID)"
+            }
+        }
+        else {
+            Write-Output "No Account Unknown profiles found."
         }
     }
-    catch {}
+    catch {
+        Write-Output "Account Unknown profile cleanup failed : $($_.Exception.Message)"
+    }
 
-    return $DeletedProfiles
+    Write-Output "Housekeeping completed."
 }
 
 # ==========================================
-# MAIN
+# MAIN LOGIC
 # ==========================================
 
 try {
 
     # STEP 1 - Validate Drive
-
-    if ($Drive.TrimEnd("\").ToUpper() -ne "C:")
+    if ($Drive.ToUpper() -ne "C:")
     {
-        $Result = [PSCustomObject]@{
+        [PSCustomObject]@{
             Drive           = $Drive
             Status          = "REASSIGN_TO_GCC"
             AssignmentGroup = "GCC Team"
-            WorkNote        = "Non-C drive detected. Incident reassigned to GCC Team."
-        }
+            WorkNotes       = "Non-C drive incident detected. Reassigned to GCC Team."
+        } | ConvertTo-Json -Depth 20
 
-        $Result | ConvertTo-Json -Depth 50
         return
     }
 
-    # STEP 2 - Get Current Utilization
+    # STEP 2 - Current Utilization
+    $Usage = Get-DiskUsage -Drive $Drive
 
-    $Usage = Get-DiskUsage -Drive "C:"
-
-    # STEP 3 - Below Threshold
-
+    # STEP 3 - Resolve if below threshold
     if ($Usage.UsedPercent -lt $Threshold)
     {
-        $Result = [PSCustomObject]@{
-            Drive              = "C:"
-            InitialUtilization = ('{0:N2}' -f $Usage.UsedPercent)
+        [PSCustomObject]@{
+            Drive              = $Drive
+            InitialUtilization = $Usage.UsedPercent
             Status             = "RESOLVED"
-            WorkNote           = @"
-Drive : C:
-Current Utilization : $('{0:N2}' -f $Usage.UsedPercent) %
+            WorkNotes          = @"
+Drive : $Drive
+Current Utilization : $($Usage.UsedPercent)%
 
-Utilization is below threshold ($Threshold%).
+Threshold : $Threshold%
 
-Incident resolved automatically.
+Utilization is below threshold.
+
+Incident auto resolved.
 "@
-        }
+        } | ConvertTo-Json -Depth 20
 
-        $Result | ConvertTo-Json -Depth 50
         return
     }
 
-    # STEP 4 - TOP 10 BEFORE HOUSEKEEPING
+    # STEP 4 - Capture Top Consumers BEFORE Housekeeping
 
     $TopFoldersBefore = Get-TopFolders -Path "C:\" -Top 10
     $TopFilesBefore   = Get-TopFiles -Path "C:\" -Top 10
@@ -257,46 +312,51 @@ Incident resolved automatically.
         -TopFolders $TopFoldersBefore `
         -TopFiles $TopFilesBefore
 
-    # Update ServiceNow Work Notes Here
+    # Update SNOW Work Notes Here
+    Write-Output $WorkNoteBefore
 
-    # STEP 5 - HOUSEKEEPING
+    # STEP 5 - Housekeeping
 
-    $DeletedProfiles = Invoke-HouseKeeping
+    Invoke-HouseKeeping
 
     Start-Sleep -Seconds 30
 
-    # STEP 6 - POST VALIDATION
+    # STEP 6 - Verify Utilization Again
 
-    $NewUsage = Get-DiskUsage -Drive "C:"
+    $NewUsage = Get-DiskUsage -Drive $Drive
 
-    # STEP 7 - RESOLVE
+    # STEP 7 - RESOLVED
 
     if ($NewUsage.UsedPercent -lt $Threshold)
     {
         $WorkNoteAfter = @"
 Housekeeping completed successfully.
 
-Utilization Before : $('{0:N2}' -f $Usage.UsedPercent) %
-Utilization After  : $('{0:N2}' -f $NewUsage.UsedPercent) %
+Before Utilization : $($Usage.UsedPercent)%
+After Utilization  : $($NewUsage.UsedPercent)%
 
-Deleted Unknown Profiles:
+Actions Performed:
+1. Recycle Bin Cleanup
+2. Windows Temp Cleanup
+3. SoftwareDistribution Cleanup (>30 Days)
+4. Unknown User Profile Cleanup
 
-$($DeletedProfiles | Format-Table -AutoSize | Out-String)
+Utilization is below threshold.
 
 Incident resolved automatically.
 "@
 
-        $Result = [PSCustomObject]@{
-            Drive              = "C:"
-            InitialUtilization = ('{0:N2}' -f $Usage.UsedPercent)
-            FinalUtilization   = ('{0:N2}' -f $NewUsage.UsedPercent)
-            DeletedProfiles    = $DeletedProfiles
+        Write-Output $WorkNoteAfter
+
+        [PSCustomObject]@{
+            Drive              = $Drive
+            InitialUtilization = $Usage.UsedPercent
+            FinalUtilization   = $NewUsage.UsedPercent
             Status             = "RESOLVED"
             WorkNoteBefore     = $WorkNoteBefore
             WorkNoteAfter      = $WorkNoteAfter
-        }
+        } | ConvertTo-Json -Depth 20
 
-        $Result | ConvertTo-Json -Depth 50
         return
     }
 
@@ -311,18 +371,18 @@ Incident resolved automatically.
         -TopFolders $TopFoldersAfter `
         -TopFiles $TopFilesAfter
 
-    $Result = [PSCustomObject]@{
-        Drive              = "C:"
-        InitialUtilization = ('{0:N2}' -f $Usage.UsedPercent)
-        FinalUtilization   = ('{0:N2}' -f $NewUsage.UsedPercent)
-        DeletedProfiles    = $DeletedProfiles
+    Write-Output $WorkNoteAfter
+
+    [PSCustomObject]@{
+        Drive              = $Drive
+        InitialUtilization = $Usage.UsedPercent
+        FinalUtilization   = $NewUsage.UsedPercent
         Status             = "REASSIGN_TO_GCC"
         AssignmentGroup    = "GCC Team"
+        LargestProfiles    = Get-LargestProfiles
         WorkNoteBefore     = $WorkNoteBefore
         WorkNoteAfter      = $WorkNoteAfter
-    }
-
-    $Result | ConvertTo-Json -Depth 50
+    } | ConvertTo-Json -Depth 20
 }
 catch {
 
@@ -330,8 +390,8 @@ catch {
         Drive           = $Drive
         Status          = "REASSIGN_TO_GCC"
         AssignmentGroup = "GCC Team"
-        WorkNote        = "Automation failed. Error: $($_.Exception.Message)"
-    } | ConvertTo-Json -Depth 50
+        WorkNotes       = "Automation failed. Error: $($_.Exception.Message)"
+    } | ConvertTo-Json -Depth 20
 }
 
 
