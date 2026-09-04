@@ -1,0 +1,162 @@
+﻿{
+    "Drive":  "C:",
+    "InitialUtilization":  "85.90",
+    "FinalUtilization":  "85.90",
+    "Status":  null,
+    "AssignmentGroup":  null,
+    "TopFoldersBefore":  [
+                             {
+                                 "Name":  "C:\\Program Files (x86)",
+                                 "SizeGB":  "3.71"
+                             },
+                             {
+                                 "Name":  "C:\\Users",
+                                 "SizeGB":  "3.60"
+                             },
+                             {
+                                 "Name":  "C:\\Windows",
+                                 "SizeGB":  "22.03"
+                             },
+                             {
+                                 "Name":  "C:\\Program Files",
+                                 "SizeGB":  "2.32"
+                             },
+                             {
+                                 "Name":  "C:\\terraform-bins",
+                                 "SizeGB":  "0.11"
+                             },
+                             {
+                                 "Name":  "C:\\Temp",
+                                 "SizeGB":  "0.05"
+                             },
+                             {
+                                 "Name":  "C:\\inetpub",
+                                 "SizeGB":  "0.00"
+                             },
+                             {
+                                 "Name":  "C:\\PerfLogs",
+                                 "SizeGB":  "0.00"
+                             }
+                         ],
+    "TopFilesBefore":  [
+                           {
+                               "FullName":  "C:\\pagefile.sys",
+                               "SizeGB":  "1.38"
+                           },
+                           {
+                               "FullName":  "C:\\Users\\Administrator\\Desktop\\Terraform\\Terraform_EKS_Cluster\\01_VPC_terraform-manifests\\.terraform\\providers\\registry.terraform.io\\hashicorp\\aws\\6.62.0\\windows_amd64\\terraform-provider-aws_v6.62.0_x5.exe",
+                               "SizeGB":  "0.84"
+                           },
+                           {
+                               "FullName":  "C:\\Recovery\\WindowsRE\\Winre.wim",
+                               "SizeGB":  "0.62"
+                           },
+                           {
+                               "FullName":  "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\152.0.4191.62\\msedge.dll",
+                               "SizeGB":  "0.32"
+                           },
+                           {
+                               "FullName":  "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\152.0.4191.62\\msedge.dll",
+                               "SizeGB":  "0.32"
+                           },
+                           {
+                               "FullName":  "C:\\Program Files (x86)\\Microsoft\\EdgeCore\\Optimized\\msedge.dll",
+                               "SizeGB":  "0.32"
+                           },
+                           {
+                               "FullName":  "C:\\Program Files (x86)\\Microsoft\\EdgeCore\\152.0.4191.62\\msedge.dll",
+                               "SizeGB":  "0.32"
+                           },
+                           {
+                               "FullName":  "C:\\Windows\\WinSxS\\amd64_microsoft-edge-webview_31bf3856ad364e35_10.0.26100.33158_none_dee7beb832791e0d\\msedge.dll",
+                               "SizeGB":  "0.30"
+                           },
+                           {
+                               "FullName":  "C:\\Windows\\System32\\Microsoft-Edge-WebView\\msedge.dll",
+                               "SizeGB":  "0.30"
+                           },
+                           {
+                               "FullName":  "C:\\Windows\\WinSxS\\amd64_microsoft-edge-webview_31bf3856ad364e35_10.0.26100.1_none_8fe1c356f34a19ca\\msedge.dll",
+                               "SizeGB":  "0.25"
+                           }
+                       ],
+    "TopFoldersAfter":  [
+                            {
+                                "Name":  "C:\\Program Files (x86)",
+                                "SizeGB":  "3.71"
+                            },
+                            {
+                                "Name":  "C:\\Users",
+                                "SizeGB":  "3.60"
+                            },
+                            {
+                                "Name":  "C:\\Windows",
+                                "SizeGB":  "22.03"
+                            },
+                            {
+                                "Name":  "C:\\Program Files",
+                                "SizeGB":  "2.32"
+                            },
+                            {
+                                "Name":  "C:\\terraform-bins",
+                                "SizeGB":  "0.11"
+                            },
+                            {
+                                "Name":  "C:\\Temp",
+                                "SizeGB":  "0.05"
+                            },
+                            {
+                                "Name":  "C:\\inetpub",
+                                "SizeGB":  "0.00"
+                            },
+                            {
+                                "Name":  "C:\\PerfLogs",
+                                "SizeGB":  "0.00"
+                            }
+                        ],
+    "TopFilesAfter":  [
+                          {
+                              "FullName":  "C:\\pagefile.sys",
+                              "SizeGB":  "1.38"
+                          },
+                          {
+                              "FullName":  "C:\\Users\\Administrator\\Desktop\\Terraform\\Terraform_EKS_Cluster\\01_VPC_terraform-manifests\\.terraform\\providers\\registry.terraform.io\\hashicorp\\aws\\6.62.0\\windows_amd64\\terraform-provider-aws_v6.62.0_x5.exe",
+                              "SizeGB":  "0.84"
+                          },
+                          {
+                              "FullName":  "C:\\Recovery\\WindowsRE\\Winre.wim",
+                              "SizeGB":  "0.62"
+                          },
+                          {
+                              "FullName":  "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\152.0.4191.62\\msedge.dll",
+                              "SizeGB":  "0.32"
+                          },
+                          {
+                              "FullName":  "C:\\Program Files (x86)\\Microsoft\\EdgeCore\\152.0.4191.62\\msedge.dll",
+                              "SizeGB":  "0.32"
+                          },
+                          {
+                              "FullName":  "C:\\Program Files (x86)\\Microsoft\\EdgeCore\\Optimized\\msedge.dll",
+                              "SizeGB":  "0.32"
+                          },
+                          {
+                              "FullName":  "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\152.0.4191.62\\msedge.dll",
+                              "SizeGB":  "0.32"
+                          },
+                          {
+                              "FullName":  "C:\\Windows\\WinSxS\\amd64_microsoft-edge-webview_31bf3856ad364e35_10.0.26100.33158_none_dee7beb832791e0d\\msedge.dll",
+                              "SizeGB":  "0.30"
+                          },
+                          {
+                              "FullName":  "C:\\Windows\\System32\\Microsoft-Edge-WebView\\msedge.dll",
+                              "SizeGB":  "0.30"
+                          },
+                          {
+                              "FullName":  "C:\\Windows\\WinSxS\\amd64_microsoft-edge-webview_31bf3856ad364e35_10.0.26100.1_none_8fe1c356f34a19ca\\msedge.dll",
+                              "SizeGB":  "0.25"
+                          }
+                      ],
+    "LargestProfiles":  null,
+    "WorkNoteBefore":  "Stage : Before Housekeeping\r\nDrive : C:\r\nUtilization : 85.90 %\r\nTop 10 Folders:\r\nC:\\Program Files (x86) - 3.71 GB\r\nC:\\Users - 3.60 GB\r\nC:\\Windows - 22.03 GB\r\nC:\\Program Files - 2.32 GB\r\nC:\\terraform-bins - 0.11 GB\r\nC:\\Temp - 0.05 GB\r\nC:\\inetpub - 0.00 GB\r\nC:\\PerfLogs - 0.00 GB\r\n\r\nTop 10 Files:\r\nC:\\pagefile.sys - 1.38 GB\r\nC:\\Users\\Administrator\\Desktop\\Terraform\\Terraform_EKS_Cluster\\01_VPC_terraform-manifests\\.terraform\\providers\\registry.terraform.io\\hashicorp\\aws\\6.62.0\\windows_amd64\\terraform-provider-aws_v6.62.0_x5.exe - 0.84 GB\r\nC:\\Recovery\\WindowsRE\\Winre.wim - 0.62 GB\r\nC:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\152.0.4191.62\\msedge.dll - 0.32 GB\r\nC:\\Program Files (x86)\\Microsoft\\Edge\\Application\\152.0.4191.62\\msedge.dll - 0.32 GB\r\nC:\\Program Files (x86)\\Microsoft\\EdgeCore\\Optimized\\msedge.dll - 0.32 GB\r\nC:\\Program Files (x86)\\Microsoft\\EdgeCore\\152.0.4191.62\\msedge.dll - 0.32 GB\r\nC:\\Windows\\WinSxS\\amd64_microsoft-edge-webview_31bf3856ad364e35_10.0.26100.33158_none_dee7beb832791e0d\\msedge.dll - 0.30 GB\r\nC:\\Windows\\System32\\Microsoft-Edge-WebView\\msedge.dll - 0.30 GB\r\nC:\\Windows\\WinSxS\\amd64_microsoft-edge-webview_31bf3856ad364e35_10.0.26100.1_none_8fe1c356f34a19ca\\msedge.dll - 0.25 GB\r\n\r\n",
+    "WorkNoteAfter":  "Stage : After Housekeeping\r\nDrive : C:\r\nUtilization : 85.90 %\r\nTop 10 Folders:\r\nC:\\Program Files (x86) - 3.71 GB\r\nC:\\Users - 3.60 GB\r\nC:\\Windows - 22.03 GB\r\nC:\\Program Files - 2.32 GB\r\nC:\\terraform-bins - 0.11 GB\r\nC:\\Temp - 0.05 GB\r\nC:\\inetpub - 0.00 GB\r\nC:\\PerfLogs - 0.00 GB\r\n\r\nTop 10 Files:\r\nC:\\pagefile.sys - 1.38 GB\r\nC:\\Users\\Administrator\\Desktop\\Terraform\\Terraform_EKS_Cluster\\01_VPC_terraform-manifests\\.terraform\\providers\\registry.terraform.io\\hashicorp\\aws\\6.62.0\\windows_amd64\\terraform-provider-aws_v6.62.0_x5.exe - 0.84 GB\r\nC:\\Recovery\\WindowsRE\\Winre.wim - 0.62 GB\r\nC:\\Program Files (x86)\\Microsoft\\Edge\\Application\\152.0.4191.62\\msedge.dll - 0.32 GB\r\nC:\\Program Files (x86)\\Microsoft\\EdgeCore\\152.0.4191.62\\msedge.dll - 0.32 GB\r\nC:\\Program Files (x86)\\Microsoft\\EdgeCore\\Optimized\\msedge.dll - 0.32 GB\r\nC:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\152.0.4191.62\\msedge.dll - 0.32 GB\r\nC:\\Windows\\WinSxS\\amd64_microsoft-edge-webview_31bf3856ad364e35_10.0.26100.33158_none_dee7beb832791e0d\\msedge.dll - 0.30 GB\r\nC:\\Windows\\System32\\Microsoft-Edge-WebView\\msedge.dll - 0.30 GB\r\nC:\\Windows\\WinSxS\\amd64_microsoft-edge-webview_31bf3856ad364e35_10.0.26100.1_none_8fe1c356f34a19ca\\msedge.dll - 0.25 GB\r\n\r\n"
+}
