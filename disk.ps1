@@ -380,3 +380,20 @@ catch {
         WorkNotes       = "Automation failed. Error: $($_.Exception.Message)"
     } | ConvertTo-Json -Depth 20
 }
+
+$Result = [PSCustomObject]@{
+    Drive           = $Drive
+    InitialUtilization = $Usage.UsedPercent
+    FinalUtilization   = $NewUsage.UsedPercent
+    Status             = $Status
+    AssignmentGroup    = $AssignmentGroup
+    TopFoldersBefore   = $TopFoldersBefore
+    TopFilesBefore     = $TopFilesBefore
+    TopFoldersAfter    = $TopFoldersAfter
+    TopFilesAfter      = $TopFilesAfter
+    LargestProfiles    = $LargestProfiles
+    WorkNoteBefore     = $WorkNoteBefore
+    WorkNoteAfter      = $WorkNoteAfter
+}
+
+$Result | ConvertTo-Json -Depth 50 | Out-File "C:\Users\Administrator\Desktop\Terraform\DiskUtilizationResult.json" -Encoding UTF8
