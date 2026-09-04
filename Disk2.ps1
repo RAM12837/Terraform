@@ -80,24 +80,51 @@ function Get-TopFiles {
 # Get Largest Profiles
 # ==========================================
 
-function Get-LargestProfiles {
+function Get-TopUserProfiles {
 
-    $profiles = "C:\Users"
-
-    Get-ChildItem $profiles -Directory -ErrorAction SilentlyContinue |
+    Get-CimInstance Win32_UserProfile |
+    Where-Object {
+        $_.Special -eq $false
+    } |
     ForEach-Object {
 
-        $size = (
-            Get-ChildItem $_.FullName -Recurse -Force -ErrorAction SilentlyContinue |
-            Measure-Object Length -Sum
-        ).Sum
+        $ProfilePath = $_.LocalPath
+
+        $Size = 0
+
+        if (Test-Path $ProfilePath) {
+
+            $Size = (
+                Get-ChildItem $ProfilePath -Recurse -Force -ErrorAction SilentlyContinue |
+                Measure-Object Length -Sum
+            ).Sum
+        }
+
+        try {
+
+            $UserName = (
+                [System.Security.Principal.SecurityIdentifier]$_.SID
+            ).Translate(
+                [System.Security.Principal.NTAccount]
+            ).Value
+
+        }
+        catch {
+
+            $UserName = "Account Unknown"
+        }
 
         [PSCustomObject]@{
-            Profile = $_.Name
-            SizeGB  = "{0:N2}" -f ($size / 1GB)
+
+            UserName   = $UserName
+            SID        = $_.SID
+            LocalPath  = $_.LocalPath
+            Loaded     = $_.Loaded
+            LastUsed   = $_.LastUseTime
+            SizeGB     = "{0:N2}" -f ($Size / 1GB)
         }
     } |
-    Sort-Object SizeGB -Descending |
+    Sort-Object { [double]$_.SizeGB } -Descending |
     Select-Object -First 10
 }
 
@@ -379,7 +406,7 @@ Incident resolved automatically.
         FinalUtilization   = $NewUsage.UsedPercent
         Status             = "REASSIGN_TO_GCC"
         AssignmentGroup    = "GCC Team"
-        LargestProfiles    = Get-LargestProfiles
+        LargestProfiles    = Get-TopUserProfiles
         WorkNoteBefore     = $WorkNoteBefore
         WorkNoteAfter      = $WorkNoteAfter
     } | ConvertTo-Json -Depth 20
@@ -405,7 +432,7 @@ $Result = [PSCustomObject]@{
     TopFilesBefore     = $TopFilesBefore
     TopFoldersAfter    = $TopFoldersAfter
     TopFilesAfter      = $TopFilesAfter
-    LargestProfiles    = $LargestProfiles
+    LargestProfiles    = Get-TopUserProfiles
     WorkNoteBefore     = $WorkNoteBefore
     WorkNoteAfter      = $WorkNoteAfter
 }
