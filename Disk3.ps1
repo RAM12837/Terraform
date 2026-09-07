@@ -198,7 +198,7 @@ function Invoke-HouseKeeping {
                 [PSCustomObject]@{
                     Category = "RecycleBin"
                     Path     = $Item.FullName
-                    SizeMB   = :Round(($Item.Length / 1MB),2)
+                    SizeMB   = "{0:N2}" -f ($Item.Length / 1MB)
                 }
             )
         }
@@ -227,7 +227,7 @@ function Invoke-HouseKeeping {
                 [PSCustomObject]@{
                     Category = "WindowsTemp"
                     Path     = $Item.FullName
-                    SizeMB   = :Round(($Item.Length / 1MB),2)
+                    SizeMB   = "{0:N2}" -f ($Item.Length / 1MB)
                 }
             )
         }
@@ -272,7 +272,7 @@ function Invoke-HouseKeeping {
                         [PSCustomObject]@{
                             Category = "SoftwareDistribution"
                             Path     = $Item.FullName
-                            SizeMB   = :Round(($Item.Length / 1MB),2)
+                            SizeMB   = "{0:N2}" -f ($Item.Length / 1MB)
                         }
                     )
                 }
@@ -550,12 +550,17 @@ Incident auto resolved.
 
     # STEP 5 - Housekeeping
     $CleanupResult = Invoke-HouseKeeping
+
     $HouseKeepingData = $CleanupResult.Actions
+
     $WorkNoteBefore += @"
-    Housekeeping Actions Performed
-    ==============================
-    Total Actions : $($HouseKeepingData.Count)
-    "@
+
+Housekeeping Actions Performed
+==============================
+
+Total Actions : $($HouseKeepingData.Count)
+
+"@
 
     foreach($Action in $HouseKeepingData)
     {
@@ -588,21 +593,21 @@ Incident auto resolved.
     if ($NewUsage.UsedPercent -lt $Threshold)
     {
         $WorkNoteAfter = @"
-        Housekeeping completed successfully.
+Housekeeping completed successfully.
 
-        Before Utilization : $($Usage.UsedPercent)%
-        After Utilization  : $($NewUsage.UsedPercent)%
+Before Utilization : $($Usage.UsedPercent)%
+After Utilization  : $($NewUsage.UsedPercent)%
 
-        Actions Performed:
-        1. Recycle Bin Cleanup
-        2. Windows Temp Cleanup
-        3. SoftwareDistribution Cleanup (>30 Days)
-        4. Unknown User Profile Cleanup
+Actions Performed:
+1. Recycle Bin Cleanup
+2. Windows Temp Cleanup
+3. SoftwareDistribution Cleanup (>30 Days)
+4. Unknown User Profile Cleanup
 
-        Utilization is below threshold.
+Utilization is below threshold.
 
-        Incident resolved automatically.
-        "@
+Incident resolved automatically.
+"@
 
         Write-Output $WorkNoteAfter
 
@@ -657,25 +662,20 @@ catch {
 
 
 $Result = [PSCustomObject]@{
-
-    Drive               = $Drive
-    InitialUtilization  = $Usage.UsedPercent
-    FinalUtilization    = $NewUsage.UsedPercent
-    Status              = $Status
-    AssignmentGroup     = "GCC Team"
-
-    TopFoldersBefore    = $TopFoldersBefore
-    TopFilesBefore      = $TopFilesBefore
-
-    CleanupActions      = $CleanupResult.Actions
-    RemovedProfiles     = $CleanupResult.RemovedProfiles
-
-    TopFoldersAfter     = $TopFoldersAfter
-    TopFilesAfter       = $TopFilesAfter
-    LargestProfiles     = $LargestProfiles
-
-    WorkNoteBefore      = $WorkNoteBefore
-    WorkNoteAfter       = $WorkNoteAfter
+    Drive           = $Drive
+    InitialUtilization = $Usage.UsedPercent
+    FinalUtilization   = $NewUsage.UsedPercent
+    Status             = $Status
+    AssignmentGroup    = "GCC Team"
+    TopFoldersBefore   = $TopFoldersBefore
+    TopFilesBefore     = $TopFilesBefore
+    CleanupActions     = $CleanupResult.Actions
+    RemovedProfiles    = $CleanupResult.RemovedProfiles
+    TopFoldersAfter    = $TopFoldersAfter
+    TopFilesAfter      = $TopFilesAfter
+    LargestProfiles    = $LargestProfiles
+    WorkNoteBefore     = $WorkNoteBefore
+    WorkNoteAfter      = $WorkNoteAfter
 }
 
 $Result | ConvertTo-Json -Depth 50 | Out-File "C:\Users\Administrator\Desktop\Terraform\DiskUtilizationResult3.json" -Encoding UTF8
