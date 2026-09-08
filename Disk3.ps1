@@ -189,8 +189,7 @@ function Invoke-HouseKeeping {
 
     try {
 
-        $RecycleItems = Get-ChildItem "C:\`$Recycle.Bin" `
-            -Force -Recurse -ErrorAction SilentlyContinue
+        $RecycleItems = Get-ChildItem "C:\`$Recycle.Bin" -Force -Recurse -ErrorAction SilentlyContinue
 
         foreach($Item in $RecycleItems)
         {
@@ -203,8 +202,7 @@ function Invoke-HouseKeeping {
             )
         }
 
-        $RecycleItems |
-            Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+        $RecycleItems | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
 
         Write-Output "Recycle Bin cleanup completed."
     }
@@ -218,8 +216,7 @@ function Invoke-HouseKeeping {
 
     try {
 
-        $TempItems = Get-ChildItem "C:\Windows\Temp" `
-            -Force -Recurse -ErrorAction SilentlyContinue
+        $TempItems = Get-ChildItem "C:\Windows\Temp" -Force -Recurse -ErrorAction SilentlyContinue
 
         foreach($Item in $TempItems)
         {
@@ -232,8 +229,7 @@ function Invoke-HouseKeeping {
             )
         }
 
-        $TempItems |
-            Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+        $TempItems | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
 
         Write-Output "Windows Temp cleanup completed."
     }
@@ -247,8 +243,7 @@ function Invoke-HouseKeeping {
 
     try {
 
-        $SCCMServer = Get-Service SMS_EXECUTIVE `
-            -ErrorAction SilentlyContinue
+        $SCCMServer = Get-Service SMS_EXECUTIVE -ErrorAction SilentlyContinue
 
         if (-not $SCCMServer)
         {
@@ -257,10 +252,7 @@ function Invoke-HouseKeeping {
 
             if(Test-Path $SoftwareDist)
             {
-                $FilesToDelete =
-                    Get-ChildItem $SoftwareDist `
-                    -Recurse -Force `
-                    -ErrorAction SilentlyContinue |
+                $FilesToDelete = Get-ChildItem $SoftwareDist -Recurse -Force -ErrorAction SilentlyContinue |
                     Where-Object {
                         -not $_.PSIsContainer -and
                         $_.LastWriteTime -lt (Get-Date).AddDays(-30)
@@ -277,9 +269,7 @@ function Invoke-HouseKeeping {
                     )
                 }
 
-                $FilesToDelete |
-                    Remove-Item -Force `
-                    -ErrorAction SilentlyContinue
+                $FilesToDelete | Remove-Item -Force -ErrorAction SilentlyContinue
             }
         }
 
@@ -349,151 +339,6 @@ function Invoke-HouseKeeping {
     }
 }
 
-# function Invoke-HouseKeeping {
-
-#     Write-Output "Starting housekeeping..."
-#     $LogFile = "C:\Temp\HouseKeeping_$(Get-Date -Format 'yyyyMMdd_HHmmss').txt"
-
-#     if (!(Test-Path "C:\Temp")) {
-#         New-Item -Path "C:\Temp" -ItemType Directory -Force | Out-Null
-#     }
-
-#     # Recycle Bin
-#     try {
-
-#         "===== RECYCLE BIN CONTENT =====" | Out-File $LogFile -Append
-
-#         $RecycleItems = Get-ChildItem "C:\`$Recycle.Bin" -Force -Recurse -ErrorAction SilentlyContinue
-
-#         $RecycleItems | Select-Object FullName,
-#         @{Name="SizeMB";Expression={"{0:N2}" -f ($_.Length/1MB)}} |
-#         Format-Table -AutoSize |
-#         Out-String |
-#         Out-File $LogFile -Append
-
-#         $RecycleItems | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
-
-#         Write-Output "Recycle Bin cleanup completed."
-#     }
-#     catch {
-#         Write-Output "Recycle Bin cleanup failed."
-#     }
-
-#     # Windows Temp
-#     try {
-
-#         "===== WINDOWS TEMP CONTENT =====" | Out-File $LogFile -Append
-
-#         $TempItems = Get-ChildItem "C:\Windows\Temp" -Force -Recurse -ErrorAction SilentlyContinue
-
-#         $TempItems | Select-Object FullName,
-#         @{Name="SizeMB";Expression={"{0:N2}" -f ($_.Length/1MB)}} |
-#         Format-Table -AutoSize |
-#         Out-String |
-#         Out-File $LogFile -Append
-
-#         $TempItems | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
-
-#         Write-Output "Windows Temp cleanup completed."
-#     }
-#     catch {
-#         Write-Output "Windows Temp cleanup failed."
-#     }
-
-#     # Software Distribution
-#     try {
-
-#         $SCCMServer = Get-Service SMS_EXECUTIVE -ErrorAction SilentlyContinue
-
-#         if (-not $SCCMServer) {
-
-#             $SoftwareDist = "C:\Windows\SoftwareDistribution\Download"
-
-#             if (Test-Path $SoftwareDist) {
-
-#                 "===== SOFTWARE DISTRIBUTION FILES =====" | Out-File $LogFile -Append
-
-#                 $FilesToDelete = Get-ChildItem $SoftwareDist -Recurse -Force -ErrorAction SilentlyContinue |
-#                 Where-Object {
-#                     -not $_.PSIsContainer -and
-#                     $_.LastWriteTime -lt (Get-Date).AddDays(-30)
-#                 }
-
-#                 $FilesToDelete | Select-Object FullName,
-#                 LastWriteTime,
-#                 @{Name="SizeMB";Expression={"{0:N2}" -f ($_.Length/1MB)}} |
-#                 Format-Table -AutoSize |
-#                 Out-String |
-#                 Out-File $LogFile -Append
-
-#                 $FilesToDelete | Remove-Item -Force -ErrorAction SilentlyContinue
-#             }
-#         }
-
-#     }
-#     catch {
-#         Write-Output "SoftwareDistribution cleanup failed."
-#     }
-
-#     # Remove Unknown Profiles
-#     $RemovedProfiles = @()
-
-#     try {
-
-#         Get-CimInstance Win32_UserProfile |
-#         Where-Object {
-#             $_.Special -eq $false -and
-#             $_.Loaded -eq $false
-#         } |
-#         ForEach-Object {
-
-#             try {
-
-#                 $SID = $_.SID
-
-#                 try {
-#                     ([System.Security.Principal.SecurityIdentifier]$SID).
-#                         Translate([System.Security.Principal.NTAccount]) | Out-Null
-#                 }
-#                 catch {
-
-#                     $RemovedProfiles += [PSCustomObject]@{
-#                         SID       = $SID
-#                         LocalPath = $_.LocalPath
-#                     }
-
-#                     "===== UNKNOWN PROFILE =====" | Out-File $LogFile -Append
-#                     "$($_.LocalPath) | $SID" | Out-File $LogFile -Append
-
-#                     Remove-CimInstance $_ -ErrorAction Stop
-#                 }
-#             }
-#             catch {
-#                 Write-Output "Failed to remove profile $($_.LocalPath)"
-#             }
-#         }
-
-#         if ($RemovedProfiles.Count -gt 0) {
-
-#             "===== REMOVED UNKNOWN PROFILES =====" | Out-File $LogFile -Append
-#             Write-Output "Removed Account Unknown Profiles:"
-
-#             $RemovedProfiles | ForEach-Object {
-#                 Write-Output "$($_.LocalPath) - $($_.SID)"
-#             }
-#         }
-#         else {
-#             Write-Output "No Account Unknown profiles found."
-#         }
-#     }
-#     catch {
-#         Write-Output "Account Unknown profile cleanup failed : $($_.Exception.Message)"
-#     }
-
-#     Write-Output "Housekeeping completed."
-#     return $LogFile
-# }
-
 # ==========================================
 # MAIN LOGIC
 # ==========================================
@@ -546,7 +391,7 @@ Incident auto resolved.
     $WorkNoteBefore = New-WorkNote -Stage "Before Housekeeping" -Utilization $Usage.UsedPercent -TopFolders $TopFoldersBefore -TopFiles $TopFilesBefore
 
     # Update SNOW Work Notes Here
-    Write-Output $WorkNoteBefore
+    #Write-Output $WorkNoteBefore
 
     # STEP 5 - Housekeeping
     $CleanupResult = Invoke-HouseKeeping
@@ -566,22 +411,7 @@ Total Actions : $($HouseKeepingData.Count)
     {
         $WorkNoteBefore +=
             "$($Action.Category) | $($Action.Path)`r`n"
-    }
-
-    # $CleanupLogFile = Invoke-HouseKeeping
-
-    # if (Test-Path $CleanupLogFile) {
-    #     $HouseKeepingData = Get-Content $CleanupLogFile -Raw
-
-    #     $WorkNoteBefore += @"
-
-    # Housekeeping Actions Performed
-    # ================================
-
-    # $HouseKeepingData
-
-    # "@
-    # }    
+    }   
 
     Start-Sleep -Seconds 30
 
@@ -609,7 +439,7 @@ Utilization is below threshold.
 Incident resolved automatically.
 "@
 
-        Write-Output $WorkNoteAfter
+        #Write-Output $WorkNoteAfter
 
         [PSCustomObject]@{
             Drive              = $Drive
@@ -637,7 +467,7 @@ Incident resolved automatically.
     {
         $WorkNoteAfter += "$($Profile.UserName) - $($Profile.SizeGB) GB - $($Profile.LocalPath)`r`n"
     }
-    Write-Output $WorkNoteAfter
+    #Write-Output $WorkNoteAfter
 
     [PSCustomObject]@{
         Drive              = $Drive
